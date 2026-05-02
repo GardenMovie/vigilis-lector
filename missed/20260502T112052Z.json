@@ -1,0 +1,62 @@
+{
+  "id": "2026-05-02T11:20:51.740939+00:00",
+  "cpu_percent": 7.0,
+  "ram_percent": 17.2,
+  "disk_percent": 29.0,
+  "ping_ms": 10.2,
+  "avg_temp_c": 38.464285714285715,
+  "max_temp_c": 60.0,
+  "min_temp_c": 16.8,
+  "temps_per_sensor": {
+    "acpitz": [
+      {
+        "label": "",
+        "current": 16.8,
+        "high": null,
+        "critical": null
+      }
+    ],
+    "nvme": [
+      {
+        "label": "Composite",
+        "current": 34.85,
+        "high": 82.85,
+        "critical": 84.85
+      },
+      {
+        "label": "Sensor 1",
+        "current": 35.85,
+        "high": 65261.85,
+        "critical": 65261.85
+      }
+    ],
+    "amdgpu": [
+      {
+        "label": "edge",
+        "current": 40.0,
+        "high": 110.0,
+        "critical": 110.0
+      },
+      {
+        "label": "junction",
+        "current": 40.0,
+        "high": 110.0,
+        "critical": 110.0
+      },
+      {
+        "label": "mem",
+        "current": 60.0,
+        "high": 105.0,
+        "critical": 105.0
+      }
+    ],
+    "k10temp": [
+      {
+        "label": "Tctl",
+        "current": 41.75,
+        "high": null,
+        "critical": null
+      }
+    ]
+  }
+}
