@@ -7,9 +7,16 @@ from datetime import datetime, timezone
 import subprocess
 import sys
 import os
+import pymongo
 from dotenv import load_dotenv
 
 load_dotenv()
+
+MONGO_URI = os.environ["MONGO_URI"]
+
+# Database and collection names
+DB_NAME = "Monitoring"
+COLLECTION_NAME = "heweyHardwareMinutely"
 
 def ping_latency(host="8.8.8.8"):
     try:
@@ -31,9 +38,9 @@ def ping_latency(host="8.8.8.8"):
 
 def collect_metrics():
 	from datetime import timezone
-	timestamp = datetime.now(timezone.utc).isoformat()
+	timestamp = datetime.now(timezone.utc)
 	metrics = {
-		"id": timestamp,
+        "timestamp": datetime.now(timezone.utc),
 		"cpu_percent": psutil.cpu_percent(interval=1),
 		"ram_percent": psutil.virtual_memory().percent,
 		"disk_percent": psutil.disk_usage('/').percent,
@@ -78,4 +85,8 @@ if __name__ == "__main__":
 		print(f"Missed metrics written to {missed_path}")
 		sys.exit(1)
 	else:
-		print(json.dumps(metrics, indent=2))
+		client = pymongo.MongoClient(MONGO_URI)
+		db = client[DB_NAME]
+		collection = db[COLLECTION_NAME]
+		result = collection.insert_one(metrics)
+		print(f"Inserted document with _id: {result.inserted_id}")
