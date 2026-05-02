@@ -7,6 +7,9 @@ from datetime import datetime, timezone
 import subprocess
 import sys
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def ping_latency(host="8.8.8.8"):
     try:
