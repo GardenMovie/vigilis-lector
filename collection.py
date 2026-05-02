@@ -1,6 +1,3 @@
-# Simplified system metrics collection: CPU, RAM, Disk usage, and temperatures
-# Collect system metrics and output as JSON with timestamp as main ID
-
 import psutil
 import json
 from datetime import datetime, timezone
@@ -38,13 +35,18 @@ def ping_latency(host="8.8.8.8"):
 
 def collect_metrics():
 	from datetime import timezone
-	timestamp = datetime.now(timezone.utc)
 	metrics = {
         "timestamp": datetime.now(timezone.utc),
-		"cpu_percent": psutil.cpu_percent(interval=1),
-		"ram_percent": psutil.virtual_memory().percent,
-		"disk_percent": psutil.disk_usage('/').percent,
-		"ping_ms": ping_latency()
+		"metadata": {
+			"hostname": "bob-arch",
+		},
+		"fields": {
+			"cpu_percent": psutil.cpu_percent(interval=1),
+			"ram_percent": psutil.virtual_memory().percent,
+			"disk_percent": psutil.disk_usage('/').percent,
+			"ping_ms": ping_latency()
+		},
+		"temps":{}
 	}
 	# Try to get temperature sensors if available, and show per-sensor details
 	try:
@@ -63,11 +65,11 @@ def collect_metrics():
 							"critical": entry.critical
 						})
 						all_temps.append(entry.current)
-			if all_temps:
-				metrics["avg_temp_c"] = sum(all_temps) / len(all_temps)
-				metrics["max_temp_c"] = max(all_temps)
-				metrics["min_temp_c"] = min(all_temps)
-			metrics["temps_per_sensor"] = per_sensor
+			# if all_temps:
+			# 	metrics["avg_temp_c"] = sum(all_temps) / len(all_temps)
+			# 	metrics["max_temp_c"] = max(all_temps)
+			# 	metrics["min_temp_c"] = min(all_temps)
+			metrics["temps"] = per_sensor
 	except Exception:
 		pass
 	return metrics
