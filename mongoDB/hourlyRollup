@@ -1,0 +1,72 @@
+      [
+  {
+    $group: {
+      _id: {
+        timestamp: {
+          $dateTrunc: {
+            date: "$timestamp",
+            unit: "hour"
+          }
+        },
+        hostname: "$metadata.hostname"
+      },
+      avgCpu: {
+        $avg: "$fields.cpu_percent"
+      },
+      minCpu: {
+        $min: "$fields.cpu_percent"
+      },
+      maxCpu: {
+        $max: "$fields.cpu_percent"
+      },
+      avgRam: {
+        $avg: "$fields.ram_percent"
+      },
+      minRam: {
+        $min: "$fields.ram_percent"
+      },
+      maxRam: {
+        $max: "$fields.ram_percent"
+      },
+      storageSpace: {
+        $max: "$fields.disk_percent"
+      },
+      avgPing: {
+        $avg: "$fields.ping_ms"
+      },
+      maxPing: {
+        $max: "$fields.ping_ms"
+      },
+      count: {
+        $sum: 1
+      }
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      timestamp: "$_id.timestamp",
+      metadata: { hostname: "$_id.hostname" },
+      fields: {
+        avgCpu: "$avgCpu",
+        minCpu: "$minCpu",
+        maxCpu: "$maxCpu",
+        avgRam: "$avgRam",
+        minRam: "$minRam",
+        maxRam: "$maxRam",
+        storageSpace: "$storageSpace",
+        avgPing: "$avgPing",
+        maxPing: "$maxPing",
+        count: "$count"
+      }
+    }
+  },
+  {
+    $merge: {
+      into: "hardwareHour",
+      on: "timestamp",
+      whenMatched: "replace",
+      whenNotMatched: "insert"
+    }
+  }
+]
