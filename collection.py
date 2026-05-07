@@ -12,8 +12,8 @@ load_dotenv()
 MONGO_URI = os.environ["MONGO_URI"]
 
 # Database and collection names
-DB_NAME = "Monitoring"
-COLLECTION_NAME = "heweyHardwareMinutely"
+DB_NAME = "Metrics"
+COLLECTION_NAME = "hardwareMin"
 
 def ping_latency(host="8.8.8.8"):
     try:
@@ -39,6 +39,8 @@ def collect_metrics():
         "timestamp": datetime.now(timezone.utc),
 		"metadata": {
 			"hostname": "bob-arch",
+			"Disk Size GB": round(psutil.disk_usage('/').total / (1024**3), 2),
+			"RAM Size GB": round(psutil.virtual_memory().total / (1024**3), 2),
 		},
 		"fields": {
 			"cpu_percent": psutil.cpu_percent(interval=1),
@@ -90,5 +92,9 @@ if __name__ == "__main__":
 		client = pymongo.MongoClient(MONGO_URI)
 		db = client[DB_NAME]
 		collection = db[COLLECTION_NAME]
+		#indexes = list(collection.list_indexes())
+		#for idx in indexes:
+		#	print(idx)
 		result = collection.insert_one(metrics)
-		print(f"Inserted document with _id: {result.inserted_id}")
+		#print(f"Inserted document with _id: {result.inserted_id}")
+		print(f"Inserted document with _id: {result.inserted_id} at {metrics['timestamp']}")
