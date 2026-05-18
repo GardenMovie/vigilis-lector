@@ -79,22 +79,23 @@ def collect_metrics():
 if __name__ == "__main__":
 	metrics = collect_metrics()
 	# Check for argument
-	if len(sys.argv) > 1 and sys.argv[1] == "1":
-		# Write to ./missed/<utc_time>.json and exit with failure
-		utc_time = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-		os.makedirs("missed", exist_ok=True)
-		missed_path = os.path.join("missed", f"{utc_time}.json")
-		with open(missed_path, "w") as f:
-			json.dump(metrics, f, indent=2)
-		print(f"Missed metrics written to {missed_path}")
-		sys.exit(1)
-	else:
+	try:
 		client = pymongo.MongoClient(MONGO_URI)
 		db = client[DB_NAME]
 		collection = db[COLLECTION_NAME]
-		#indexes = list(collection.list_indexes())
-		#for idx in indexes:
-		#	print(idx)
 		result = collection.insert_one(metrics)
-		#print(f"Inserted document with _id: {result.inserted_id}")
 		print(f"Inserted document with _id: {result.inserted_id} at {metrics['timestamp']}")
+	except Exception as e:
+		print(f"MongoDB insert failed: {e}")
+		# Save metrics to missed/ folder
+		import pathlib
+		missed_dir = pathlib.Path("missed")
+		missed_dir.mkdir(exist_ok=True)
+		# Use UTC timestamp for filename
+		ts = metrics["timestamp"].strftime("%Y%m%dT%H%M%SZ")
+		missed_file = missed_dir / f"{ts}.json"
+		# Convert datetime to isoformat for JSON
+		metrics_serializable = json.loads(json.dumps(metrics, default=str))
+		with open(missed_file, "w") as f:
+			json.dump(metrics_serializable, f, indent=2)
+		print(f"Saved missed metrics to {missed_file}")
