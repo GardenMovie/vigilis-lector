@@ -1,0 +1,87 @@
+[
+  {
+    $sort: {
+      timestamp: 1
+    }
+  },
+  {
+    $group: {
+      _id: {
+        timestamp: {
+          $dateTrunc: {
+            date: "$timestamp",
+            unit: "day"
+          }
+        },
+        hostname: "$metadata.hostname"
+      },
+      avgCpu: {
+        $avg: "$fields.avgCpu"
+      },
+      minCpu: {
+        $min: "$fields.minCpu"
+      },
+      maxCpu: {
+        $max: "$fields.maxCpu"
+      },
+      avgRam: {
+        $avg: "$fields.avgRam"
+      },
+      minRam: {
+        $min: "$fields.minRam"
+      },
+      maxRam: {
+        $max: "$fields.maxRam"
+      },
+      storageSpace: {
+        $first: "$fields.storageSpace"
+      },
+      avgPing: {
+        $avg: "$fields.avgPing"
+      },
+      maxPing: {
+        $max: "$fields.maxPing"
+      },
+      count: {
+        $sum: 1
+      }
+    }
+  },
+  {
+    $project: {
+      _id: {
+        $concat: [
+          {
+            $toString: "$_id.timestamp"
+          },
+          "_",
+          "$_id.hostname"
+        ]
+      },
+      timestamp: "$_id.timestamp",
+      metadata: {
+        hostname: "$_id.hostname"
+      },
+      fields: {
+        avgCpu: "$avgCpu",
+        minCpu: "$minCpu",
+        maxCpu: "$maxCpu",
+        avgRam: "$avgRam",
+        minRam: "$minRam",
+        maxRam: "$maxRam",
+        storageSpace: "$storageSpace",
+        avgPing: "$avgPing",
+        maxPing: "$maxPing",
+        count: "$count"
+      }
+    }
+  },
+  {
+    $merge: {
+      into: "hardwareDay",
+      on: "_id",
+      whenMatched: "replace",
+      whenNotMatched: "insert"
+    }
+  }
+]
