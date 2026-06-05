@@ -73,10 +73,12 @@ def populate_specifications(client):
     specs = client["Hosts"]["specifications"]
     doc = {
         "hostname": HOSTNAME,
-        "ramCapacityGB": RAM_CAPACITY,
-        "diskCapacityGB": DISK_CAPACITY,
-        "cpuModel": CPU_MODEL,
-        "gpuModel": GPU_MODEL,
+        "fields": {
+            "ramCapacity": RAM_CAPACITY,
+            "diskCapacity": DISK_CAPACITY,
+            "cpuModel": CPU_MODEL,
+            "gpuModel": GPU_MODEL,
+        }
     }
     specs.delete_many({"hostname": HOSTNAME})
     specs.insert_one(doc)
