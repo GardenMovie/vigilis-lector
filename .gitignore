@@ -1,3 +1,4 @@
 /missed
 .env
 nohup.out
+logs/*
