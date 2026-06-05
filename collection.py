@@ -61,32 +61,32 @@ def collect_metrics():
 			"disk_percent": psutil.disk_usage('/').percent,
 			"ping_ms": ping_latency()
 		},
-		"temps":{}
+		# "temps":{}
 	}
 	# Try to get temperature sensors if available, and show per-sensor details
-	try:
-		temps = psutil.sensors_temperatures()
-		if temps:
-			per_sensor = {}
-			all_temps = []
-			for sensor_name, sensor_entries in temps.items():
-				per_sensor[sensor_name] = []
-				for entry in sensor_entries:
-					if entry.current is not None:
-						per_sensor[sensor_name].append({
-							"label": entry.label or "",
-							"current": entry.current,
-							"high": entry.high,
-							"critical": entry.critical
-						})
-						all_temps.append(entry.current)
-			# if all_temps:
-			# 	metrics["avg_temp_c"] = sum(all_temps) / len(all_temps)
-			# 	metrics["max_temp_c"] = max(all_temps)
-			# 	metrics["min_temp_c"] = min(all_temps)
-			metrics["temps"] = per_sensor
-	except Exception:
-		pass
+	# try:
+	# 	temps = psutil.sensors_temperatures()
+	# 	if temps:
+	# 		per_sensor = {}
+	# 		all_temps = []
+	# 		for sensor_name, sensor_entries in temps.items():
+	# 			per_sensor[sensor_name] = []
+	# 			for entry in sensor_entries:
+	# 				if entry.current is not None:
+	# 					per_sensor[sensor_name].append({
+	# 						"label": entry.label or "",
+	# 						"current": entry.current,
+	# 						"high": entry.high,
+	# 						"critical": entry.critical
+	# 					})
+	# 					all_temps.append(entry.current)
+	# 		# if all_temps:
+	# 		# 	metrics["avg_temp_c"] = sum(all_temps) / len(all_temps)
+	# 		# 	metrics["max_temp_c"] = max(all_temps)
+	# 		# 	metrics["min_temp_c"] = min(all_temps)
+	# 		metrics["temps"] = per_sensor
+	# except Exception:
+	# 	pass
 	return metrics
 
 if __name__ == "__main__":
