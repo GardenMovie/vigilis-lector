@@ -1,0 +1,15 @@
+[Unit]
+Description=Vigilis Lector hardware metrics collector
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=garden
+WorkingDirectory=/home/garden/dev/vigilis-lector
+ExecStart=/usr/bin/python3 /home/garden/dev/vigilis-lector/collection.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
