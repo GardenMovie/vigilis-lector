@@ -1,5 +1,4 @@
 import psutil
-import json
 from datetime import datetime, timezone
 import subprocess
 import sys
@@ -87,15 +86,3 @@ if __name__ == "__main__":
 		print(f"Inserted document with _id: {result.inserted_id} at {metrics['timestamp']}")
 	except Exception as e:
 		print(f"MongoDB insert failed: {e}")
-		# Save metrics to missed/ folder
-		import pathlib
-		missed_dir = pathlib.Path("missed")
-		missed_dir.mkdir(exist_ok=True)
-		# Use UTC timestamp for filename
-		ts = metrics["timestamp"].strftime("%Y%m%dT%H%M%SZ")
-		missed_file = missed_dir / f"{ts}.json"
-		# Convert datetime to isoformat for JSON
-		metrics_serializable = json.loads(json.dumps(metrics, default=str))
-		with open(missed_file, "w") as f:
-			json.dump(metrics_serializable, f, indent=2)
-		print(f"Saved missed metrics to {missed_file}")

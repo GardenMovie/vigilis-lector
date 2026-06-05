@@ -7,7 +7,6 @@ A lightweight hardware metrics collector that runs on Linux hosts and ships data
 - `collection.py` gathers CPU, RAM, disk, ping, and temperature readings once per minute and inserts them into `Metrics.hardwareMin`.
 - A systemd service (`vigilis-lector.service`) keeps the collector running on boot.
 - Two Atlas Scheduled Triggers (`hourlyRollup`, `dailyRollup`) aggregate the minute-level data into `Metrics.hardwareHour` and `Metrics.hardwareDay`.
-- If a MongoDB insert fails, the metric is saved locally to `missed/` and can be reviewed with `uploadMissed.py`.
 
 ## Collections
 
