@@ -1,4 +1,20 @@
-      [
+exports = async function () {
+  // A Scheduled Trigger will always call a function without arguments.
+  // Documentation on Triggers: https://www.mongodb.com/docs/atlas/app-services/triggers/
+
+  // Functions run by Triggers are run as System users and have full access to Services, Functions, and MongoDB Data.
+
+  // Get the MongoDB service you want to use (see "Linked Data Sources" tab)
+  const serviceName = "MonitoringSystem";
+  const databaseName = "Metrics";
+  const collectionName = "hardwareMin";
+  const collection = context.services
+    .get(serviceName)
+    .db(databaseName)
+    .collection(collectionName);
+
+  const pipeline =
+[
   {
     $group: {
       _id: {
@@ -29,7 +45,7 @@
         $max: "$fields.ram_percent"
       },
       storageSpace: {
-        $max: "$fields.disk_percent"
+        $first: "$fields.disk_percent"
       },
       avgPing: {
         $avg: "$fields.ping_ms"
@@ -44,9 +60,19 @@
   },
   {
     $project: {
-      _id: 0,
+      _id: {
+        $concat: [
+          {
+            $toString: "$_id.timestamp"
+          },
+          "_",
+          "$_id.hostname"
+        ]
+      },
       timestamp: "$_id.timestamp",
-      metadata: { hostname: "$_id.hostname" },
+      metadata: {
+        hostname: "$_id.hostname"
+      },
       fields: {
         avgCpu: "$avgCpu",
         minCpu: "$minCpu",
@@ -64,9 +90,19 @@
   {
     $merge: {
       into: "hardwareHour",
-      on: "timestamp",
+      on: "_id",
       whenMatched: "replace",
       whenNotMatched: "insert"
     }
   }
 ]
+
+
+
+  
+  try {
+    await collection.aggregate(pipeline).toArray();
+  } catch (err) {
+    console.log("error performing aggregation pipeline: ", err.message);
+  }
+};
