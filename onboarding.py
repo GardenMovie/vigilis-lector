@@ -1,11 +1,57 @@
 import os
 import sys
 import subprocess
-from dotenv import load_dotenv
+from pathlib import Path
+from dotenv import load_dotenv, set_key
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
-load_dotenv()
+ENV_PATH = Path(os.path.dirname(__file__)) / ".env"
+
+ENV_FIELDS = [
+    ("MONGO_URI",     "MongoDB connection URI",           str,  None),
+    ("HOSTNAME",      "Hostname for this machine",        str,  None),
+    ("RAMCAPACITY",   "RAM capacity (GB, integer)",       int,  None),
+    ("DISKCAPACITY",  "Disk capacity (GB, integer)",      int,  None),
+    ("CPUMODEL",      "CPU model string",                 str,  None),
+    ("GPUMODEL",      "GPU model string",                 str,  None),
+]
+
+
+def ensure_env():
+    load_dotenv(ENV_PATH)
+    missing = [key for key, *_ in ENV_FIELDS if not os.environ.get(key)]
+    if not missing:
+        return
+
+    if not ENV_PATH.exists():
+        print("\n  No .env file found. Let's create one.")
+    else:
+        print(f"\n  .env found but missing keys: {', '.join(missing)}")
+
+    print("  Answer the prompts below — your .env will be written/updated.\n")
+
+    for key, label, cast, _ in ENV_FIELDS:
+        if os.environ.get(key):
+            continue
+        while True:
+            value = input(f"  {label} [{key}]: ").strip()
+            if not value:
+                print("    (value required, try again)")
+                continue
+            try:
+                cast(value)
+            except ValueError:
+                print(f"    (expected {cast.__name__}, try again)")
+                continue
+            break
+        set_key(str(ENV_PATH), key, value)
+        os.environ[key] = value
+
+    print(f"\n  .env written to {ENV_PATH}\n")
+
+
+ensure_env()
 
 MONGO_URI = os.environ["MONGO_URI"]
 HOSTNAME = os.environ["HOSTNAME"]
