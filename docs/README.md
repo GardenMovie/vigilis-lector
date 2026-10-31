@@ -9,6 +9,7 @@ A lightweight hardware metrics collector that runs on Linux hosts and ships data
 - `collection.py` gathers CPU, RAM, disk, and ping readings once per minute and inserts them into `Metrics.hardwareMin`.
 - A systemd service (`vigilis-lector.service`) keeps the collector running on boot.
 - Two Atlas Scheduled Triggers (`hourlyRollup`, `dailyRollup`) aggregate the minute-level data into `Metrics.hardwareHour` and `Metrics.hardwareDay`.
+- An Atlas Scheduled Trigger (`silentHostAlert`) posts a Discord alert when a host stops reporting.
 
 ## Collections
 
@@ -72,6 +73,7 @@ python3 utilities/ping_mongoDB.py
 In the Atlas UI (or mongosh), create these collections:
 
 - `Hosts.specifications` — no TTL
+- `Hosts.alertState` — no TTL; used by `mongoDB/silentHostAlert.js` to avoid repeat alerts
 - `Metrics.hardwareMin` — timeseries collection with a native TTL index on `timestamp`, expireAfterSeconds: `604800` (7 days)
 - `Metrics.hardwareHour` — plain collection, no native TTL support; retention (90 days) is enforced by `mongoDB/purgeOldEntriesHourly.js`
 - `Metrics.hardwareDay` — no TTL, indefinite retention
@@ -85,6 +87,9 @@ Deploy all JS files as App Services Scheduled Triggers in the Atlas UI or via th
 | `mongoDB/hourlyRollup.js` | Every hour | `Metrics.hardwareHour` |
 | `mongoDB/dailyRollup.js` | Every day | `Metrics.hardwareDay` |
 | `mongoDB/purgeOldEntriesHourly.js` | Every day | Deletes `Metrics.hardwareHour` docs older than 90 days |
+| `mongoDB/silentHostAlert.js` | Every 5 minutes | Posts to Discord when a host stops reporting; tracks state in `Hosts.alertState` |
+
+`silentHostAlert.js` reads the webhook URL from an App Services Value (create it as a Secret) named `DISCORD_WEBHOOK_URL`. A host counts as silent when its newest `hardwareMin` sample is more than 10 minutes old. It alerts once per silence and resets quietly when the host returns.
 
 #### 4. Insert host specifications
 
